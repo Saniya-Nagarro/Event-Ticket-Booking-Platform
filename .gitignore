@@ -5,7 +5,7 @@ target/
 .project
 .settings/
 bin/
-
+**/.factorypath
 *.log
 
 .DS_Store
