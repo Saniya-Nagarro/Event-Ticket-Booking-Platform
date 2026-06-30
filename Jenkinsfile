@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.9'
         jdk 'JDK-17'
+        maven 'Maven-3.9'
     }
 
     environment {
-        DOCKER_IMAGE_PREFIX = "event-ticket"
-        SONARQUBE_ENV = "SonarQube"
+        SONARQUBE_ENV = 'SonarQube'
+        IMAGE_PREFIX = 'event-ticket'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -19,129 +20,40 @@ pipeline {
         }
 
         stage('Build') {
-            parallel {
-                stage('Build User Service') {
-                    steps {
-                        dir('user-service') {
-                            bat 'mvn clean compile'
-                        }
-                    }
-                }
-
-                stage('Build Event Service') {
-                    steps {
-                        dir('event-service') {
-                            bat 'mvn clean compile'
-                        }
-                    }
-                }
-
-                stage('Build Booking Service') {
-                    steps {
-                        dir('booking-service') {
-                            bat 'mvn clean compile'
-                        }
-                    }
-                }
-
-                stage('Build Notification Service') {
-                    steps {
-                        dir('notification-service') {
-                            bat 'mvn clean compile'
-                        }
-                    }
-                }
+            steps {
+                bat 'mvn -f user-service/pom.xml clean compile'
+                bat 'mvn -f event-service/pom.xml clean compile'
+                bat 'mvn -f booking-service/pom.xml clean compile'
+                bat 'mvn -f notification-service/pom.xml clean compile'
             }
         }
 
         stage('Unit Testing + JaCoCo') {
-            parallel {
-                stage('Test User Service') {
-                    steps {
-                        dir('user-service') {
-                            bat 'mvn test'
-                        }
-                    }
-                }
-
-                stage('Test Event Service') {
-                    steps {
-                        dir('event-service') {
-                            bat 'mvn test'
-                        }
-                    }
-                }
-
-                stage('Test Booking Service') {
-                    steps {
-                        dir('booking-service') {
-                            bat 'mvn test'
-                        }
-                    }
-                }
-
-                stage('Test Notification Service') {
-                    steps {
-                        dir('notification-service') {
-                            bat 'mvn test'
-                        }
-                    }
-                }
+            steps {
+                bat 'mvn -f user-service/pom.xml test'
+                bat 'mvn -f event-service/pom.xml test'
+                bat 'mvn -f booking-service/pom.xml test'
+                bat 'mvn -f notification-service/pom.xml test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    dir('user-service') {
-                        bat 'mvn sonar:sonar'
-                    }
-                    dir('event-service') {
-                        bat 'mvn sonar:sonar'
-                    }
-                    dir('booking-service') {
-                        bat 'mvn sonar:sonar'
-                    }
-                    dir('notification-service') {
-                        bat 'mvn sonar:sonar'
-                    }
+                    bat 'mvn -f user-service/pom.xml sonar:sonar -Dsonar.projectKey=user-service -Dsonar.projectName=user-service'
+                    bat 'mvn -f event-service/pom.xml sonar:sonar -Dsonar.projectKey=event-service -Dsonar.projectName=event-service'
+                    bat 'mvn -f booking-service/pom.xml sonar:sonar -Dsonar.projectKey=booking-service -Dsonar.projectName=booking-service'
+                    bat 'mvn -f notification-service/pom.xml sonar:sonar -Dsonar.projectKey=notification-service -Dsonar.projectName=notification-service'
                 }
             }
         }
 
         stage('Package') {
-            parallel {
-                stage('Package User Service') {
-                    steps {
-                        dir('user-service') {
-                            bat 'mvn clean package -DskipTests'
-                        }
-                    }
-                }
-
-                stage('Package Event Service') {
-                    steps {
-                        dir('event-service') {
-                            bat 'mvn clean package -DskipTests'
-                        }
-                    }
-                }
-
-                stage('Package Booking Service') {
-                    steps {
-                        dir('booking-service') {
-                            bat 'mvn clean package -DskipTests'
-                        }
-                    }
-                }
-
-                stage('Package Notification Service') {
-                    steps {
-                        dir('notification-service') {
-                            bat 'mvn clean package -DskipTests'
-                        }
-                    }
-                }
+            steps {
+                bat 'mvn -f user-service/pom.xml clean package -DskipTests'
+                bat 'mvn -f event-service/pom.xml clean package -DskipTests'
+                bat 'mvn -f booking-service/pom.xml clean package -DskipTests'
+                bat 'mvn -f notification-service/pom.xml clean package -DskipTests'
             }
         }
 
@@ -157,16 +69,16 @@ pipeline {
 
     post {
         always {
-            junit '**/target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
 
         success {
-            echo 'CI pipeline completed successfully.'
+            echo 'Week 3 CI/CD pipeline completed successfully.'
         }
 
         failure {
-            echo 'CI pipeline failed.'
+            echo 'Week 3 CI/CD pipeline failed. Check console logs.'
         }
     }
 }
