@@ -12,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -24,7 +23,7 @@ pipeline {
                 stage('Build User Service') {
                     steps {
                         dir('user-service') {
-                            sh 'mvn clean compile'
+                            bat 'mvn clean compile'
                         }
                     }
                 }
@@ -32,7 +31,7 @@ pipeline {
                 stage('Build Event Service') {
                     steps {
                         dir('event-service') {
-                            sh 'mvn clean compile'
+                            bat 'mvn clean compile'
                         }
                     }
                 }
@@ -40,7 +39,7 @@ pipeline {
                 stage('Build Booking Service') {
                     steps {
                         dir('booking-service') {
-                            sh 'mvn clean compile'
+                            bat 'mvn clean compile'
                         }
                     }
                 }
@@ -48,7 +47,7 @@ pipeline {
                 stage('Build Notification Service') {
                     steps {
                         dir('notification-service') {
-                            sh 'mvn clean compile'
+                            bat 'mvn clean compile'
                         }
                     }
                 }
@@ -60,7 +59,7 @@ pipeline {
                 stage('Test User Service') {
                     steps {
                         dir('user-service') {
-                            sh 'mvn test'
+                            bat 'mvn test'
                         }
                     }
                 }
@@ -68,7 +67,7 @@ pipeline {
                 stage('Test Event Service') {
                     steps {
                         dir('event-service') {
-                            sh 'mvn test'
+                            bat 'mvn test'
                         }
                     }
                 }
@@ -76,7 +75,7 @@ pipeline {
                 stage('Test Booking Service') {
                     steps {
                         dir('booking-service') {
-                            sh 'mvn test'
+                            bat 'mvn test'
                         }
                     }
                 }
@@ -84,7 +83,7 @@ pipeline {
                 stage('Test Notification Service') {
                     steps {
                         dir('notification-service') {
-                            sh 'mvn test'
+                            bat 'mvn test'
                         }
                     }
                 }
@@ -95,16 +94,16 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     dir('user-service') {
-                        sh 'mvn sonar:sonar'
+                        bat 'mvn sonar:sonar'
                     }
                     dir('event-service') {
-                        sh 'mvn sonar:sonar'
+                        bat 'mvn sonar:sonar'
                     }
                     dir('booking-service') {
-                        sh 'mvn sonar:sonar'
+                        bat 'mvn sonar:sonar'
                     }
                     dir('notification-service') {
-                        sh 'mvn sonar:sonar'
+                        bat 'mvn sonar:sonar'
                     }
                 }
             }
@@ -115,7 +114,7 @@ pipeline {
                 stage('Package User Service') {
                     steps {
                         dir('user-service') {
-                            sh 'mvn clean package -DskipTests'
+                            bat 'mvn clean package -DskipTests'
                         }
                     }
                 }
@@ -123,7 +122,7 @@ pipeline {
                 stage('Package Event Service') {
                     steps {
                         dir('event-service') {
-                            sh 'mvn clean package -DskipTests'
+                            bat 'mvn clean package -DskipTests'
                         }
                     }
                 }
@@ -131,7 +130,7 @@ pipeline {
                 stage('Package Booking Service') {
                     steps {
                         dir('booking-service') {
-                            sh 'mvn clean package -DskipTests'
+                            bat 'mvn clean package -DskipTests'
                         }
                     }
                 }
@@ -139,7 +138,7 @@ pipeline {
                 stage('Package Notification Service') {
                     steps {
                         dir('notification-service') {
-                            sh 'mvn clean package -DskipTests'
+                            bat 'mvn clean package -DskipTests'
                         }
                     }
                 }
@@ -148,10 +147,10 @@ pipeline {
 
         stage('Docker Image Build') {
             steps {
-                sh 'docker build -t event-ticket/user-service:latest ./user-service'
-                sh 'docker build -t event-ticket/event-service:latest ./event-service'
-                sh 'docker build -t event-ticket/booking-service:latest ./booking-service'
-                sh 'docker build -t event-ticket/notification-service:latest ./notification-service'
+                bat 'docker build -t event-ticket/user-service:latest ./user-service'
+                bat 'docker build -t event-ticket/event-service:latest ./event-service'
+                bat 'docker build -t event-ticket/booking-service:latest ./booking-service'
+                bat 'docker build -t event-ticket/notification-service:latest ./notification-service'
             }
         }
     }
