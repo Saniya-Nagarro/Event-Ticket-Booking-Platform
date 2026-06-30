@@ -41,13 +41,9 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-
                     bat 'mvn -f user-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=user-service -Dsonar.projectName=user-service'
-
                     bat 'mvn -f event-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=event-service -Dsonar.projectName=event-service'
-
                     bat 'mvn -f booking-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=booking-service -Dsonar.projectName=booking-service'
-
                     bat 'mvn -f notification-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=notification-service -Dsonar.projectName=notification-service'
                 }
             }
@@ -64,21 +60,18 @@ pipeline {
 
         stage('Docker Image Build') {
             steps {
-                bat 'docker build -t event-ticket/user-service:latest ./user-service'
-                bat 'docker build -t event-ticket/event-service:latest ./event-service'
-                bat 'docker build -t event-ticket/booking-service:latest ./booking-service'
-                bat 'docker build -t event-ticket/notification-service:latest ./notification-service'
+                bat 'wsl docker build -t event-ticket/user-service:latest ./user-service'
+                bat 'wsl docker build -t event-ticket/event-service:latest ./event-service'
+                bat 'wsl docker build -t event-ticket/booking-service:latest ./booking-service'
+                bat 'wsl docker build -t event-ticket/notification-service:latest ./notification-service'
             }
         }
     }
 
     post {
-
         always {
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-
-            archiveArtifacts artifacts: '**/target/*.jar',
-                             allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
 
         success {
