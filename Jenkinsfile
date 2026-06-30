@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     tools {
@@ -39,11 +40,15 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    bat 'mvn -f user-service/pom.xml sonar:sonar -Dsonar.projectKey=user-service -Dsonar.projectName=user-service'
-                    bat 'mvn -f event-service/pom.xml sonar:sonar -Dsonar.projectKey=event-service -Dsonar.projectName=event-service'
-                    bat 'mvn -f booking-service/pom.xml sonar:sonar -Dsonar.projectKey=booking-service -Dsonar.projectName=booking-service'
-                    bat 'mvn -f notification-service/pom.xml sonar:sonar -Dsonar.projectKey=notification-service -Dsonar.projectName=notification-service'
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+
+                    bat 'mvn -f user-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=user-service -Dsonar.projectName=user-service'
+
+                    bat 'mvn -f event-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=event-service -Dsonar.projectName=event-service'
+
+                    bat 'mvn -f booking-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=booking-service -Dsonar.projectName=booking-service'
+
+                    bat 'mvn -f notification-service/pom.xml sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=%SONAR_TOKEN% -Dsonar.projectKey=notification-service -Dsonar.projectName=notification-service'
                 }
             }
         }
@@ -68,9 +73,12 @@ pipeline {
     }
 
     post {
+
         always {
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+
+            archiveArtifacts artifacts: '**/target/*.jar',
+                             allowEmptyArchive: true
         }
 
         success {
