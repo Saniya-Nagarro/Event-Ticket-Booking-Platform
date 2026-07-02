@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.event.ticketing.booking_service.client.EventClient;
 import com.event.ticketing.booking_service.dto.BookingRequestDTO;
+import com.event.ticketing.booking_service.dto.BookingRequestV2DTO;
 import com.event.ticketing.booking_service.dto.BookingResponseDTO;
 import com.event.ticketing.booking_service.dto.EventResponseDTO;
 import com.event.ticketing.booking_service.entity.Booking;
@@ -76,6 +77,64 @@ public class BookingServiceImpl implements BookingService {
 
 		log.info("Booking confirmed bookingId={} userEmail={} eventId={} tickets={} totalAmount={}", booking.getId(),
 				booking.getUserEmail(), booking.getEventId(), booking.getNumberOfTickets(), booking.getTotalAmount());
+
+		bookingEventProducer.publishBookingCreated(BookingCreatedEvent.builder().eventType("BOOKING_CREATED")
+				.correlationId(MDC.get("correlationId")).bookingId(booking.getId()).eventId(booking.getEventId())
+				.userEmail(booking.getUserEmail()).numberOfTickets(booking.getNumberOfTickets())
+				.totalAmount(booking.getTotalAmount()).createdAt(booking.getCreatedAt()).build());
+
+		log.info("Kafka event published eventType=BOOKING_CREATED bookingId={} eventId={} userEmail={}",
+				booking.getId(), booking.getEventId(), booking.getUserEmail());
+
+		return mapToResponse(booking);
+	}
+
+	@Override
+	@Transactional
+	public BookingResponseDTO bookTicketV2(BookingRequestV2DTO request) {
+		String loggedInEmail = getLoggedInEmail();
+
+		log.info("Booking started userEmail={} eventId={} tickets={} couponCode={} paymentMode={}", loggedInEmail,
+				request.getEventId(), request.getNumberOfTickets(), request.getCouponCode(), request.getPaymentMode());
+
+		EventResponseDTO event = eventClient.getEventById(request.getEventId());
+
+		if (event == null) {
+			log.warn("Booking failed reason=event_not_found userEmail={} eventId={}", loggedInEmail,
+					request.getEventId());
+			throw new RuntimeException("Event not found");
+		}
+
+		if (!"PUBLISHED".equalsIgnoreCase(event.getStatus())) {
+			log.warn("Booking failed reason=event_not_published userEmail={} eventId={} status={}", loggedInEmail,
+					request.getEventId(), event.getStatus());
+			throw new RuntimeException("Event is not available for booking");
+		}
+
+		if (event.getAvailableSeats() == null || event.getAvailableSeats() < request.getNumberOfTickets()) {
+			log.warn(
+					"Booking failed reason=not_enough_seats userEmail={} eventId={} requestedTickets={} availableSeats={}",
+					loggedInEmail, request.getEventId(), request.getNumberOfTickets(), event.getAvailableSeats());
+			throw new RuntimeException("Not enough seats available");
+		}
+
+		eventClient.reduceSeats(request.getEventId(), request.getNumberOfTickets());
+
+		BigDecimal totalAmount = event.getTicketPrice().multiply(BigDecimal.valueOf(request.getNumberOfTickets()));
+
+		if ("WELCOME10".equalsIgnoreCase(request.getCouponCode())) {
+			totalAmount = totalAmount.subtract(totalAmount.multiply(BigDecimal.valueOf(0.10)));
+		}
+
+		Booking booking = Booking.builder().eventId(request.getEventId()).userEmail(loggedInEmail)
+				.numberOfTickets(request.getNumberOfTickets()).totalAmount(totalAmount).status(BookingStatus.CONFIRMED)
+				.build();
+
+		bookingRepository.save(booking);
+
+		log.info("Booking confirmed bookingId={} userEmail={} eventId={} tickets={} totalAmount={} paymentMode={}",
+				booking.getId(), booking.getUserEmail(), booking.getEventId(), booking.getNumberOfTickets(),
+				booking.getTotalAmount(), request.getPaymentMode());
 
 		bookingEventProducer.publishBookingCreated(BookingCreatedEvent.builder().eventType("BOOKING_CREATED")
 				.correlationId(MDC.get("correlationId")).bookingId(booking.getId()).eventId(booking.getEventId())
