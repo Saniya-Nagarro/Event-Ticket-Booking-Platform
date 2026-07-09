@@ -32,6 +32,7 @@ import com.event.ticketing.booking_service.entity.Booking;
 import com.event.ticketing.booking_service.enums.BookingStatus;
 import com.event.ticketing.booking_service.event.BookingCancelledEvent;
 import com.event.ticketing.booking_service.event.BookingCreatedEvent;
+import com.event.ticketing.booking_service.metrics.BookingMetrics;
 import com.event.ticketing.booking_service.producer.BookingEventProducer;
 import com.event.ticketing.booking_service.repository.BookingRepository;
 import com.event.ticketing.booking_service.service.impl.BookingServiceImpl;
@@ -50,6 +51,9 @@ class BookingServiceImplTest {
 
 	@InjectMocks
 	private BookingServiceImpl bookingService;
+	
+    @Mock
+    private BookingMetrics bookingMetrics;
 
 	@AfterEach
 	void clearContext() {

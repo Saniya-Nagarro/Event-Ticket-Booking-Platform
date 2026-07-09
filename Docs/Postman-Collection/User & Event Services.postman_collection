@@ -1,0 +1,783 @@
+{
+  "info": {
+    "_postman_id": "359a5548-ed44-4ddf-8c8b-6e63fd01876f",
+    "name": "Event Ticket Booking Platform - User & Event Services",
+    "description": "Postman collection for User Service and Event Service with JWT/RBAC flow. First login as admin, then use {{adminToken}} for protected APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42488001"
+  },
+  "item": [
+    {
+      "name": "User Service",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('adminToken', res.token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@gmail.com\",\n  \"password\": \"superadmin123\"\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/auth/login",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('customerToken', res.token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test6\",\n  \"email\": \"test6@gmail.com\",\n  \"password\": \"test6\"\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/auth/register",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('customerToken', res.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"saniya@gmail.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/auth/login",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/profile",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User as Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Second Admin\",\n  \"email\": \"admin2@gmail.com\",\n  \"password\": \"admin123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User as Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Second Admin\",\n  \"email\": \"admin2@gmail.com\",\n  \"password\": \"admin123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users as Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Id as Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User as Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated User\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User as Admin",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Event Service",
+      "item": [
+        {
+          "name": "Create Event as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "  pm.collectionVariables.set('eventId', res.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Java Tech Conference\",\n  \"description\": \"Spring Boot and Microservices event\",\n  \"venue\": \"Delhi Convention Center\",\n  \"eventDateTime\": \"2026-07-20T10:00:00\",\n  \"totalSeats\": 100,\n  \"ticketPrice\": 999.00\n}"
+            },
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event as Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Java Tech Conference\",\n  \"venue\": \"Noida Convention Center\",\n  \"ticketPrice\": 1199.00\n}"
+            },
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Patch Event as Admin",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Java Tech Conference\",\n  \"venue\": \"Noida Convention Center\",\n  \"ticketPrice\": 1199.00\n}"
+            },
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Event as Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}/publish",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "publish"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Event as Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}/cancel",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Published Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/search?keyword=java",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "java"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Event Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}/availability",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "availability"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reduce Seats",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}/reduce-seats?count=2",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "reduce-seats"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Increase Seats",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/api/events/{{eventId}}/increase-seats?count=2",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "increase-seats"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "EmailNotify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7074/api/notifications/send?type=EMAIL&to=test@gmail.com&message=Booking confirmed",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7074",
+              "path": [
+                "api",
+                "notifications",
+                "send"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "EMAIL"
+                },
+                {
+                  "key": "to",
+                  "value": "test@gmail.com"
+                },
+                {
+                  "key": "message",
+                  "value": "Booking confirmed"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SMSNotify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7074/api/notifications/send?type=SMS&to=9876543210&message=Booking confirmed",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "7074",
+              "path": [
+                "api",
+                "notifications",
+                "send"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "SMS"
+                },
+                {
+                  "key": "to",
+                  "value": "9876543210"
+                },
+                {
+                  "key": "message",
+                  "value": "Booking confirmed"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Endpoints",
+      "item": [
+        {
+          "name": "User Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{userServiceBaseUrl}}/actuator",
+              "host": [
+                "{{userServiceBaseUrl}}"
+              ],
+              "path": [
+                "actuator"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Event Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eventServiceBaseUrl}}/actuator/metrics",
+              "host": [
+                "{{eventServiceBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "metrics"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "userServiceBaseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "eventServiceBaseUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "eventId",
+      "value": "1"
+    }
+  ]
+}

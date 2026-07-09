@@ -20,13 +20,13 @@ public class ConcurrentBookingTest {
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-        CountDownLatch startSignal = new CountDownLatch(1);
+        CountDownLatch startSignal = new CountDownLatch(2);
 
         Runnable request1 = () -> sendBookingRequest(
                 httpClient,
                 startSignal,
                 "Request-1",
-                1L,
+                15L,
                 1
         );
 
@@ -34,7 +34,7 @@ public class ConcurrentBookingTest {
                 httpClient,
                 startSignal,
                 "Request-2",
-                11L,
+                15L,
                 1
         );
 

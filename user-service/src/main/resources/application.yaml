@@ -21,3 +21,12 @@ spring:
 jwt:
   secret: my-secret-key-my-secret-key-my-secret-key
   expiration: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus	
+  endpoint:
+    health:
+      show-details: always			

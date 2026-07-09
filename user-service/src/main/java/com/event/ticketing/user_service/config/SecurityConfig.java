@@ -28,8 +28,8 @@ public class SecurityConfig {
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-				.permitAll().requestMatchers("/api/auth/**").permitAll().requestMatchers("/api/users/**")
-				.hasAnyRole("SUPER_ADMIN", "ADMIN").requestMatchers("/api/profile/**")
+				.permitAll().requestMatchers("/api/auth/**").permitAll().requestMatchers("/actuator/**").permitAll()
+				.requestMatchers("/api/users/**").hasAnyRole("SUPER_ADMIN", "ADMIN").requestMatchers("/api/profile/**")
 				.hasAnyRole("SUPER_ADMIN", "ADMIN", "CUSTOMER").anyRequest().authenticated());
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

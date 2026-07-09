@@ -20,10 +20,12 @@ import com.event.ticketing.booking_service.entity.Booking;
 import com.event.ticketing.booking_service.enums.BookingStatus;
 import com.event.ticketing.booking_service.event.BookingCancelledEvent;
 import com.event.ticketing.booking_service.event.BookingCreatedEvent;
+import com.event.ticketing.booking_service.metrics.BookingMetrics;
 import com.event.ticketing.booking_service.producer.BookingEventProducer;
 import com.event.ticketing.booking_service.repository.BookingRepository;
 import com.event.ticketing.booking_service.service.BookingService;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +37,9 @@ public class BookingServiceImpl implements BookingService {
 	private final BookingRepository bookingRepository;
 	private final EventClient eventClient;
 	private final BookingEventProducer bookingEventProducer;
+	private final BookingMetrics bookingMetrics;
 
+	@Timed(value = "booking_create_time", description = "Time taken to create booking")
 	@Override
 	@Transactional
 	public BookingResponseDTO bookTicket(BookingRequestDTO request) {
@@ -49,12 +53,14 @@ public class BookingServiceImpl implements BookingService {
 		if (event == null) {
 			log.warn("Booking failed reason=event_not_found userEmail={} eventId={}", loggedInEmail,
 					request.getEventId());
+			bookingMetrics.incrementBookingFailed();
 			throw new RuntimeException("Event not found");
 		}
 
 		if (!"PUBLISHED".equalsIgnoreCase(event.getStatus())) {
 			log.warn("Booking failed reason=event_not_published userEmail={} eventId={} status={}", loggedInEmail,
 					request.getEventId(), event.getStatus());
+			bookingMetrics.incrementBookingFailed();
 			throw new RuntimeException("Event is not available for booking");
 		}
 
@@ -62,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
 			log.warn(
 					"Booking failed reason=not_enough_seats userEmail={} eventId={} requestedTickets={} availableSeats={}",
 					loggedInEmail, request.getEventId(), request.getNumberOfTickets(), event.getAvailableSeats());
+			bookingMetrics.incrementBookingFailed();
 			throw new RuntimeException("Not enough seats available");
 		}
 
@@ -74,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
 				.build();
 
 		bookingRepository.save(booking);
-
+		bookingMetrics.incrementBookingCreated();
 		log.info("Booking confirmed bookingId={} userEmail={} eventId={} tickets={} totalAmount={}", booking.getId(),
 				booking.getUserEmail(), booking.getEventId(), booking.getNumberOfTickets(), booking.getTotalAmount());
 
@@ -183,6 +190,7 @@ public class BookingServiceImpl implements BookingService {
 		return mapToResponse(booking);
 	}
 
+	@Timed(value = "booking_cancel_time", description = "Time taken to cancel booking")
 	@Override
 	@Transactional
 	public BookingResponseDTO cancelBooking(Long id) {
@@ -195,12 +203,14 @@ public class BookingServiceImpl implements BookingService {
 		if (!booking.getUserEmail().equals(loggedInEmail)) {
 			log.warn("Booking cancellation denied bookingId={} requestedBy={} owner={}", id, loggedInEmail,
 					booking.getUserEmail());
+
 			throw new AccessDeniedException("You can cancel only your own booking");
 		}
 
 		if (booking.getStatus() == BookingStatus.CANCELLED) {
 			log.warn("Booking cancellation failed reason=already_cancelled bookingId={} userEmail={}", id,
 					loggedInEmail);
+
 			throw new RuntimeException("Booking already cancelled");
 		}
 
@@ -208,7 +218,7 @@ public class BookingServiceImpl implements BookingService {
 
 		eventClient.increaseSeats(booking.getEventId(), booking.getNumberOfTickets());
 		bookingRepository.save(booking);
-
+		bookingMetrics.incrementBookingCancelled();
 		log.info("Booking cancelled bookingId={} userEmail={} eventId={} tickets={}", booking.getId(),
 				booking.getUserEmail(), booking.getEventId(), booking.getNumberOfTickets());
 

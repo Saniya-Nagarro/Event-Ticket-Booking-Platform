@@ -25,26 +25,25 @@ public class SecurityConfig {
 
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		http.authorizeHttpRequests(
-				auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+				.permitAll().requestMatchers("/actuator/**").permitAll()
+				// Public GET APIs
+				.requestMatchers(HttpMethod.GET, "/api/events").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/events/search").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/events/*/availability").permitAll()
 
-						// Public GET APIs
-						.requestMatchers(HttpMethod.GET, "/api/events").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/events/search").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/events/*/availability").permitAll()
+				// Booking service APIs
+				.requestMatchers(HttpMethod.PUT, "/api/events/*/reduce-seats").authenticated()
+				.requestMatchers(HttpMethod.PUT, "/api/events/*/increase-seats").authenticated()
 
-						// Booking service APIs
-						.requestMatchers(HttpMethod.PUT, "/api/events/*/reduce-seats").authenticated()
-						.requestMatchers(HttpMethod.PUT, "/api/events/*/increase-seats").authenticated()
+				// Admin APIs
+				.requestMatchers(HttpMethod.POST, "/api/events").hasAnyRole("ADMIN", "SUPER_ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/events/*").hasAnyRole("ADMIN", "SUPER_ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/events/*/publish").hasAnyRole("ADMIN", "SUPER_ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/events/*/cancel").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-						// Admin APIs
-						.requestMatchers(HttpMethod.POST, "/api/events").hasAnyRole("ADMIN", "SUPER_ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/events/*").hasAnyRole("ADMIN", "SUPER_ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/events/*/publish").hasAnyRole("ADMIN", "SUPER_ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/events/*/cancel").hasAnyRole("ADMIN", "SUPER_ADMIN")
-
-						.anyRequest().authenticated());
+				.anyRequest().authenticated());
 
 		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
